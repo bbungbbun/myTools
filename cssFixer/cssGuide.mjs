@@ -6,15 +6,30 @@ import path from 'path';
 function formatCSS(css) {
     // 여는 중괄호 앞에 공백 추가
     css = css.replace(/{/g, ' {');
-    
-    // 중괄호 내부에서 ':' 뒤에 공백이 없는 경우에만 공백 추가
-    css = css.replace(/:\s*(?!\s)/g, ': ');
-    
-    // 중괄호 내부에서 ';' 뒤에 공백이 없는 경우에만 공백 추가
-    css = css.replace(/;\s*(?!\s)/g, '; ');
-    
-    // 세미콜론과 닫는 중괄호를 붙여쓰기
-    css = css.replace(/;\s*}/g, ';}');
+
+    // 의사 클래스 및 의사 요소를 제외한 규칙을 처리하기 위한 정규식
+    const regex = /([^{]+?)(\{([^}]*)\})/g;
+
+    // 각 규칙을 반복 처리
+    css = css.replace(regex, (match, selector, declarationBlock) => {
+        // 의사 클래스 또는 의사 요소가 포함된 선택자 여부 확인
+        const hasPseudo = /:\s*(before|after|hover|focus|nth-child|nth-of-type|nth-last-child|nth-last-of-type|first-child|last-child|not)/.test(selector);
+
+        // 의사 클래스가 포함되지 않은 경우에만 수정
+        if (!hasPseudo) {  
+            // 중괄호 내부에서 ':' 뒤에 공백이 없는 경우에만 공백 추가
+            declarationBlock = declarationBlock.replace(/:\s*(?!\s)/g, ': ');
+
+            // 중괄호 내부에서 ';' 뒤에 공백이 없는 경우에만 공백 추가
+            declarationBlock = declarationBlock.replace(/;\s*(?!\s)/g, '; ');
+
+            // 세미콜론과 닫는 중괄호를 붙여쓰기
+            declarationBlock = declarationBlock.replace(/;\s*}/g, ';}');
+        }
+
+        // 선택자와 변환된 선언 블록을 다시 조합
+        return `${selector}${declarationBlock}`;
+    });
 
     return css;
 }
