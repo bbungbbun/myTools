@@ -4,14 +4,19 @@ import path from 'path';
 
 // CSS 파일을 규칙에 맞춰 변환하는 함수
 function formatCSS(css) {
-    // 주어진 규칙에 맞춰 패턴을 교체
-    let formattedCSS = css
-        .replace(/{/g, ' {')               // 여는 중괄호 앞에 공백 추가
-        .replace(/:/g, ': ')               // 콜론 뒤에 공백 추가
-        .replace(/;/g, '; ')               // 세미콜론 뒤에 공백 추가
-        .replace(/; }/g, ';}');            // 세미콜론과 닫는 중괄호는 붙여쓰기
+    // 여는 중괄호 앞에 공백 추가
+    css = css.replace(/{/g, ' {');
+    
+    // 중괄호 내부에서 ':' 뒤에 공백이 없는 경우에만 공백 추가
+    css = css.replace(/:\s*(?!\s)/g, ': ');
+    
+    // 중괄호 내부에서 ';' 뒤에 공백이 없는 경우에만 공백 추가
+    css = css.replace(/;\s*(?!\s)/g, '; ');
+    
+    // 세미콜론과 닫는 중괄호를 붙여쓰기
+    css = css.replace(/;\s*}/g, ';}');
 
-    return formattedCSS;
+    return css;
 }
 
 // CSS 파일을 읽고 수정한 후 저장하는 함수
